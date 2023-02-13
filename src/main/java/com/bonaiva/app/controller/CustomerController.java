@@ -6,14 +6,12 @@ import com.bonaiva.app.controller.mapper.CustomerDtoMapper;
 import com.bonaiva.app.usecase.CreateCustomer;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping
+@RequestMapping("customers")
 @RequiredArgsConstructor
 public class CustomerController {
 
@@ -21,6 +19,7 @@ public class CustomerController {
     private final CreateCustomer createCustomer;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public CustomerResponseDto create(@RequestBody @Valid final CustomerRequestDto request)  {
         final var customerToCreate = customerDtoMapper.fromRequestDto(request);
         final var createdCustomer = createCustomer.execute(customerToCreate);
