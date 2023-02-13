@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-java-k8s
+  namespace: ns-java-k8s
+  labels:
+    app: app-java-k8s
+spec:
+  selector:
+    matchLabels:
+      app: app-java-k8s
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: app-java-k8s
+    spec:
+      containers:
+        - name: app-java-k8s
+          image: sbonaiva/app-java-k8s:28
+          ports:
+            - containerPort: 8080
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 1024Mi
+            requests:
+              cpu: 500m
+              memory: 512Mi
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /ping
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10

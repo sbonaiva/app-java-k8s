@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-java-k8s
+  namespace: ns-java-k8s
+spec:
+  selector:
+    app: app-java-k8s
+  ports:
+    - protocol: TCP
+      port: 8080
