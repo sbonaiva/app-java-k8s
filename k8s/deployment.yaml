@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: app-java-k8s
-          image: sbonaiva/app-java-k8s:2
+          image: sbonaiva/app-java-k8s:3
           ports:
             - containerPort: 8080
           resources:
@@ -30,13 +30,13 @@ spec:
               memory: 512Mi
           readinessProbe:
             httpGet:
-              path: /actuator/health/readiness
+              path: /api/v1/customers/actuator/health/readiness
               port: 8080
             initialDelaySeconds: 10
             periodSeconds: 15
           livenessProbe:
             httpGet:
-              path: /actuator/health/liveness
+              path: /api/v1/customers/actuator/health/liveness
               port: 8080
             initialDelaySeconds: 10
             periodSeconds: 15
