@@ -1,7 +1,7 @@
 package com.bonaiva.app.controller.mapper;
 
-import com.bonaiva.app.controller.dto.CustomerRequestDto;
-import com.bonaiva.app.controller.dto.CustomerResponseDto;
+import com.bonaiva.app.controller.dto.request.CustomerRequestDto;
+import com.bonaiva.app.controller.dto.response.CustomerResponseDto;
 import com.bonaiva.app.domain.Customer;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;

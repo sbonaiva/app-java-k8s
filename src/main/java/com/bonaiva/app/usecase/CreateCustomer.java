@@ -11,9 +11,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class CreateCustomer {
 
     private final CustomerGateway customerGateway;
+    private final GetAddress getAddress;
 
     @Transactional
     public Customer execute(final Customer customer) {
+
+        final var address = getAddress.execute(customer.getAddress().getPostalCode());
+        customer.enrichWithAddress(address);
         return customerGateway.create(customer);
     }
 }

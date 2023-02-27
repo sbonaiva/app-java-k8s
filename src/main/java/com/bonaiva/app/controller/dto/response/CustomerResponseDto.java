@@ -1,4 +1,4 @@
-package com.bonaiva.app.controller.dto;
+package com.bonaiva.app.controller.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,5 +11,6 @@ public class CustomerResponseDto {
 
     private Long id;
     private String name;
+    private AddressResponseDto address;
 
 }

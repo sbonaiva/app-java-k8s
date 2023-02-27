@@ -1,6 +1,8 @@
-package com.bonaiva.app.controller.dto;
+package com.bonaiva.app.controller.dto.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,8 +15,12 @@ import org.hibernate.validator.constraints.Length;
 @AllArgsConstructor
 public class CustomerRequestDto {
 
-    @NotEmpty(message = "attribute 'name' is required")
-    @Length(max = 255, message = "attribute 'name' has a maximum of 255 characters")
+    @NotEmpty
+    @Length(max = 255)
     private String name;
+
+    @Valid
+    @NotNull
+    private AddressRequestDto address;
 
 }
