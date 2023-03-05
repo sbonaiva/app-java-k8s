@@ -1,4 +1,4 @@
-package com.bonaiva.app.integration;
+package com.bonaiva.app.controller;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import org.junit.jupiter.api.BeforeEach;

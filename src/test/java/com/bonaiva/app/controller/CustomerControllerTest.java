@@ -1,4 +1,4 @@
-package com.bonaiva.app.integration;
+package com.bonaiva.app.controller;
 
 import com.bonaiva.app.controller.dto.AddressRequestDto;
 import com.bonaiva.app.controller.dto.CustomerRequestDto;

@@ -1,9 +1,7 @@
-package com.bonaiva.app.unit;
+package com.bonaiva.app.usecase;
 
 import com.bonaiva.app.domain.Address;
 import com.bonaiva.app.domain.Customer;
-import com.bonaiva.app.usecase.CreateCustomer;
-import com.bonaiva.app.usecase.GetAddress;
 import com.bonaiva.app.usecase.gateway.CustomerGateway;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
