@@ -1,4 +1,4 @@
-package com.bonaiva.app.controller.dto.request;
+package com.bonaiva.app.controller.dto;
 
 import com.bonaiva.app.controller.annotation.PostalCode;
 import jakarta.validation.constraints.NotEmpty;

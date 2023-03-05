@@ -1,59 +1,65 @@
 package com.bonaiva.app.integration;
 
-import com.bonaiva.app.AbstractTest;
-import com.bonaiva.app.controller.dto.request.AddressRequestDto;
-import com.bonaiva.app.controller.dto.request.CustomerRequestDto;
+import com.bonaiva.app.controller.dto.AddressRequestDto;
+import com.bonaiva.app.controller.dto.CustomerRequestDto;
+import com.bonaiva.app.controller.dto.CustomerResponseDto;
 import com.bonaiva.app.domain.Address;
-import com.bonaiva.app.usecase.GetAddress;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.jsonResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
 
-class CustomerControllerTest extends AbstractTest {
-
-    private static final String CUSTOMER_BASE_PATH = "/customers";
-
-    @MockBean
-    private GetAddress getAddress;
+class CustomerControllerTest extends IntegrationTest {
 
     @Test
     void createCustomerSuccessfully() throws Exception {
 
+        var mockReponseBody = Address.builder()
+                .postalCode("37795000")
+                .street("Praça Vinte e Dois de Fevereiro")
+                .neighborhood("Centro")
+                .city("Andradas")
+                .state("MG")
+                .build();
+
+        stubFor(get(urlPathEqualTo("/api/v1/address"))
+                .withQueryParam("postalCode", WireMock.equalTo("37795000"))
+                .willReturn(jsonResponse(mockReponseBody, HttpStatus.OK.value())
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
+
         var requestBody = CustomerRequestDto.builder()
                 .name("Geralt De Rivia")
                 .address(AddressRequestDto.builder()
+                        .number("222")
+                        .complement("Cs 4")
                         .postalCode("37795000")
                         .build())
                 .build();
 
-        var requestBytes = objectMapper.writeValueAsBytes(requestBody);
-
-        var request = post(CUSTOMER_BASE_PATH)
+        webTestClient.post()
+                .uri("/customers")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(requestBytes);
-
-        when(getAddress.execute("37795000"))
-                .thenReturn(Address.builder()
-                        .postalCode("37795000")
-                        .street("Praça Vinte e Dois de Fevereiro")
-                        .neighborhood("Centro")
-                        .city("Andradas")
-                        .state("MG")
-                        .build());
-
-        mockMvc.perform(request)
-                .andDo(print())
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id", greaterThan(0)))
-                .andExpect(jsonPath("$.name", is("Geralt De Rivia")));
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(CustomerResponseDto.class)
+                .value(CustomerResponseDto::getId, notNullValue())
+                .value(CustomerResponseDto::getAddress, notNullValue())
+                .value(v -> v.getAddress().getPostalCode(), equalTo(mockReponseBody.getPostalCode()))
+                .value(v -> v.getAddress().getStreet(), equalTo(mockReponseBody.getStreet()))
+                .value(v -> v.getAddress().getNumber(), equalTo(requestBody.getAddress().getNumber()))
+                .value(v -> v.getAddress().getComplement(), equalTo(requestBody.getAddress().getComplement()))
+                .value(v -> v.getAddress().getNeighborhood(), equalTo(mockReponseBody.getNeighborhood()))
+                .value(v -> v.getAddress().getCity(), equalTo(mockReponseBody.getCity()))
+                .value(v -> v.getAddress().getState(), equalTo(mockReponseBody.getState()));
     }
 }

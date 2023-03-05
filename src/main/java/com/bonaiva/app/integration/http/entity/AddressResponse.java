@@ -1,4 +1,4 @@
-package com.bonaiva.app.controller.dto.response;
+package com.bonaiva.app.integration.http.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class AddressResponseDto {
+public class AddressResponse {
 
     private String postalCode;
     private String street;

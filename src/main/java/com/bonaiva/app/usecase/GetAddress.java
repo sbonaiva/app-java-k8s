@@ -4,6 +4,7 @@ import com.bonaiva.app.domain.Address;
 import com.bonaiva.app.usecase.exception.AddressNotFoundException;
 import com.bonaiva.app.usecase.gateway.AddressGateway;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -12,7 +13,7 @@ public class GetAddress {
 
     private final AddressGateway addressGateway;
 
-    public Address execute(final String postalCode) {
+    public Address execute(@NonNull final String postalCode) {
         return addressGateway.get(postalCode)
                 .orElseThrow(() -> new AddressNotFoundException(postalCode));
     }

@@ -1,4 +1,4 @@
-package com.bonaiva.app.controller.dto.response;
+package com.bonaiva.app.controller.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

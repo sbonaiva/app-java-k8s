@@ -7,4 +7,5 @@ import java.util.Optional;
 public interface AddressGateway {
 
     Optional<Address> get(String postalCode);
+
 }

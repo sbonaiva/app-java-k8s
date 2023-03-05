@@ -37,7 +37,7 @@ public class CustomerIntegration implements CustomerGateway {
             final var entityToCreate = customerEntityMapper.toEntity(customer);
             final var createdEntity = customerRepository.saveAndFlush(entityToCreate);
             return customerEntityMapper.fromEntity(createdEntity);
-        } catch (Exception e) {
+        } catch (final Exception e) {
             log.error("Failed to create customer", e);
             throw new CreateCustomerException();
         }

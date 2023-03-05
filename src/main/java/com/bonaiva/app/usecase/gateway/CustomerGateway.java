@@ -7,7 +7,6 @@ import java.util.Optional;
 public interface CustomerGateway {
 
     Optional<Customer> get(Long id);
-
     Customer create(Customer customer);
 
 }

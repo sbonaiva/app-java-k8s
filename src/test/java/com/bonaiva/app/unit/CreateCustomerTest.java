@@ -1,14 +1,15 @@
 package com.bonaiva.app.unit;
 
-import com.bonaiva.app.AbstractTest;
 import com.bonaiva.app.domain.Address;
 import com.bonaiva.app.domain.Customer;
 import com.bonaiva.app.usecase.CreateCustomer;
 import com.bonaiva.app.usecase.GetAddress;
 import com.bonaiva.app.usecase.gateway.CustomerGateway;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -17,15 +18,16 @@ import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class CreateCustomerTest extends AbstractTest {
+@ExtendWith(MockitoExtension.class)
+class CreateCustomerTest {
 
-    @MockBean
+    @Mock
     private CustomerGateway customerGateway;
 
-    @MockBean
+    @Mock
     private GetAddress getAddress;
 
-    @Autowired
+    @InjectMocks
     private CreateCustomer createCustomer;
 
     @Test

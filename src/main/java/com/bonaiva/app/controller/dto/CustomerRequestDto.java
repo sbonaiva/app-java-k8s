@@ -1,4 +1,4 @@
-package com.bonaiva.app.controller.dto.request;
+package com.bonaiva.app.controller.dto;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
