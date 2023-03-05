@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration;
 @Data
 @Configuration
 @ConfigurationProperties(prefix = "services.address")
-public class AddressProperties {
+public class AddressProperties implements CustomWebClientProperties {
 
     private String baseUrl;
     private Integer timeout;

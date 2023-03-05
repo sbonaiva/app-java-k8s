@@ -1,23 +1,21 @@
 package com.bonaiva.app.integration.http;
 
 import com.bonaiva.app.integration.http.configuration.AddressProperties;
+import com.bonaiva.app.integration.http.configuration.CustomWebClientBuilder;
 import com.bonaiva.app.integration.http.entity.AddressResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
-
 @Component
 public class AddressClient {
 
     private final WebClient webClient;
 
-    public AddressClient(final WebClient.Builder webClientBuilder,
+    public AddressClient(final CustomWebClientBuilder customWebClientBuilder,
                          final AddressProperties addressProperties) {
-        this.webClient = webClientBuilder
-                .baseUrl(addressProperties.getBaseUrl())
-                .build();
+        this.webClient = customWebClientBuilder.create(addressProperties);
     }
 
     public AddressResponse retrieve(final String postalCode) {
