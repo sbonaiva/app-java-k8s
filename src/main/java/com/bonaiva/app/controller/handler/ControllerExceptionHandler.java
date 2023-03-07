@@ -29,7 +29,6 @@ public class ControllerExceptionHandler {
 
     @ExceptionHandler(BindException.class)
     public ProblemDetail handleMethodArgumentNotValidException(final BindException e) {
-
         var problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, VALIDATION_ERROR_MESSAGE);
         e.getFieldErrors().forEach(fe ->  problemDetail.setProperty(fe.getField(), fe.getDefaultMessage()));
         return problemDetail;

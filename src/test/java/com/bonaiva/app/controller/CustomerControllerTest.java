@@ -8,11 +8,19 @@ import com.bonaiva.app.domain.Customer;
 import com.bonaiva.app.usecase.CreateCustomer;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ProblemDetail;
 
+import java.util.stream.Stream;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalToIgnoreCase;
 import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
@@ -20,7 +28,11 @@ import static com.github.tomakehurst.wiremock.client.WireMock.jsonResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
+import static org.hamcrest.Matchers.anEmptyMap;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasEntry;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 
 class CustomerControllerTest extends IntegrationTest {
@@ -72,7 +84,112 @@ class CustomerControllerTest extends IntegrationTest {
                 .value(v -> v.getAddress().getState(), equalTo(mockReponseBody.getState()));
 
         verify(exactly(1), getRequestedFor(urlPathEqualTo("/api/v1/address"))
-                .withQueryParam("postalCode", WireMock.equalTo("37795000")));
+                .withQueryParam("postalCode", equalToIgnoreCase("37795000")));
+    }
+
+    @Test
+    void createCustomerWithGetAddressError() {
+
+        stubFor(get(urlPathEqualTo("/api/v1/address"))
+                .withQueryParam("postalCode", WireMock.equalTo("37795000"))
+                .willReturn(aResponse().withStatus(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)));
+
+        var requestBody = CustomerRequestDto.builder()
+                .name("Geralt De Rivia")
+                .address(AddressRequestDto.builder()
+                        .number("222")
+                        .complement("Cs 4")
+                        .postalCode("37795000")
+                        .build())
+                .build();
+
+        webTestClient.post()
+                .uri("/customers")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
+                .expectBody(ProblemDetail.class)
+                .value(ProblemDetail::getStatus, equalTo(HttpStatus.INTERNAL_SERVER_ERROR.value()))
+                .value(ProblemDetail::getDetail, equalTo("Failed to retrieve address"));
+
+        verify(exactly(1), getRequestedFor(urlPathEqualTo("/api/v1/address"))
+                .withQueryParam("postalCode", equalToIgnoreCase("37795000")));
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidPostalCodeCases")
+    void createCustomerWithPostalCodeValidationError(final String postalCode,
+                                                final String error) {
+
+        var requestBody = CustomerRequestDto.builder()
+                .name("Geralt De Rivia")
+                .address(AddressRequestDto.builder()
+                        .number("222")
+                        .complement("Cs 4")
+                        .postalCode(postalCode)
+                        .build())
+                .build();
+
+        webTestClient.post()
+                .uri("/customers")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(ProblemDetail.class)
+                .value(ProblemDetail::getStatus, equalTo(HttpStatus.BAD_REQUEST.value()))
+                .value(ProblemDetail::getDetail, equalTo("Validation failed"))
+                .value(ProblemDetail::getProperties, not(anEmptyMap()))
+                .value(ProblemDetail::getProperties, hasEntry("address.postalCode", error));
+    }
+
+    private static Stream<Arguments> invalidPostalCodeCases() {
+        return Stream.of(
+                Arguments.of("abcdef", "invalid postal code"),
+                Arguments.of("123456789", "invalid postal code"),
+                Arguments.of("", "must not be empty"),
+                Arguments.of(null, "must not be empty")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidNameCases")
+    void createCustomerWithNameValidationError(final String name,
+                                          final String error) {
+
+        var requestBody = CustomerRequestDto.builder()
+                .name(name)
+                .address(AddressRequestDto.builder()
+                        .number("222")
+                        .complement("Cs 4")
+                        .postalCode("37795000")
+                        .build())
+                .build();
+
+        webTestClient.post()
+                .uri("/customers")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestBody)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(ProblemDetail.class)
+                .value(ProblemDetail::getStatus, equalTo(HttpStatus.BAD_REQUEST.value()))
+                .value(ProblemDetail::getDetail, equalTo("Validation failed"))
+                .value(ProblemDetail::getProperties, not(anEmptyMap()))
+                .value(ProblemDetail::getProperties, hasEntry("name", error));
+    }
+
+    private static Stream<Arguments> invalidNameCases() {
+        return Stream.of(
+                Arguments.of(randomAlphabetic(256), "length must be between 0 and 255"),
+                Arguments.of("", "must not be empty"),
+                Arguments.of(null, "must not be empty")
+        );
     }
 
     @Test
