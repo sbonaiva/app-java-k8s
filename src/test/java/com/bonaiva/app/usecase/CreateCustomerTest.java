@@ -2,6 +2,8 @@ package com.bonaiva.app.usecase;
 
 import com.bonaiva.app.domain.Address;
 import com.bonaiva.app.domain.Customer;
+import com.bonaiva.app.integration.exception.CreateCustomerException;
+import com.bonaiva.app.usecase.exception.AddressNotFoundException;
 import com.bonaiva.app.usecase.gateway.CustomerGateway;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,7 +13,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -57,5 +61,58 @@ class CreateCustomerTest {
 
         verify(getAddress, only()).execute(expectedAddress.getPostalCode());
         verify(customerGateway, only()).create(any(Customer.class));
+    }
+
+    @Test
+    void createCustomerException() {
+
+        var expectedAddress = Address.builder()
+                .postalCode("37795000")
+                .street("Praça Vinte e Dois de Fevereiro")
+                .neighborhood("Centro")
+                .city("Andradas")
+                .state("MG")
+                .build();
+
+        var expectedCustomer = Customer.builder()
+                .name("Geralt de Rivia")
+                .address(expectedAddress)
+                .build();
+
+        when(getAddress.execute(expectedAddress.getPostalCode()))
+                .thenReturn(expectedAddress);
+
+        when(customerGateway.create(any(Customer.class)))
+                .thenThrow(new CreateCustomerException());
+
+        assertThrows(CreateCustomerException.class, () -> createCustomer.execute(expectedCustomer));
+
+        verify(getAddress, only()).execute(expectedAddress.getPostalCode());
+        verify(customerGateway, only()).create(any(Customer.class));
+    }
+
+    @Test
+    void createCustomerWithGetAddressException() {
+
+        var expectedAddress = Address.builder()
+                .postalCode("37795000")
+                .street("Praça Vinte e Dois de Fevereiro")
+                .neighborhood("Centro")
+                .city("Andradas")
+                .state("MG")
+                .build();
+
+        var expectedCustomer = Customer.builder()
+                .name("Geralt de Rivia")
+                .address(expectedAddress)
+                .build();
+
+        when(getAddress.execute(expectedAddress.getPostalCode()))
+                .thenThrow(new AddressNotFoundException(expectedAddress.getPostalCode()));
+
+        assertThrows(AddressNotFoundException.class, () -> createCustomer.execute(expectedCustomer));
+
+        verify(getAddress, only()).execute(expectedAddress.getPostalCode());
+        verify(customerGateway, never()).create(any(Customer.class));
     }
 }
